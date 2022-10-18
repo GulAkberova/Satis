@@ -1,0 +1,10 @@
+.filter{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+   position: relative;
+}
+.filter input{
+    position: absolute;
+    right: 0;
+}
