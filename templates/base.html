@@ -9,6 +9,7 @@
     <title>Kontakt demo</title>
     {%endblock%}
     <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- CSS only -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
 
@@ -60,6 +61,23 @@
             {%if search%}
             <p class="pt-4">{{search}}:{{products.count}}</p>
             {%endif%}
+            <a href="{%url 'sale:wishlist'%}" class="my-4 mx-2" style="cursor:pointer;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4.419c-2.826-5.695-11.999-4.064-11.999 3.27 0 7.27 9.903 10.938 11.999 15.311 2.096-4.373 12-8.041 12-15.311 0-7.327-9.17-8.972-12-3.27z"/></svg>
+            </a>
+            <a class="nav-link" href="{% url 'sale:basket' %}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M10 19.5c0 .829-.672 1.5-1.5 1.5s-1.5-.671-1.5-1.5c0-.828.672-1.5 1.5-1.5s1.5.672 1.5 1.5zm3.5-1.5c-.828 0-1.5.671-1.5 1.5s.672 1.5 1.5 1.5 1.5-.671 1.5-1.5c0-.828-.672-1.5-1.5-1.5zm1.336-5l1.977-7h-16.813l2.938 7h11.898zm4.969-10l-3.432 12h-12.597l.839 2h13.239l3.474-12h1.929l.743-2h-4.195z"/></svg>
+          
+              <span class="text-danger" style="font-weight: bold; font-size: 16px;"
+                    id="basket_counter">{{ basket_count }}</span></a>
+              <a href="{% url 'accounts:register' %}">
+                <i class="fa-solid fa-right-to-bracket mx-2"></i>
+              </a>
+             
+              <a href="{% url 'accounts:login' %}">
+                <i class="fa-solid fa-user mx-2"></i>
+              </a>
+
+
+             
           </div>
         </div>
       </nav>
@@ -76,5 +94,14 @@
 
     <!-- JavaScript Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+<script src='https://code.jquery.com/jquery-3.2.1.min.js'></script>
+
+
+{%block js%}
+
+{%endblock%}
 </body>
 </html>

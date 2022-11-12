@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block  title %}
+    {{ block.super }}
+{% endblock %}
+
+{% block css %}
+    <style>
+        .btn-valeh {
+            color: white;
+            background-color: #d35400;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+
+    <section class="mt-5">
+        {% csrf_token %}
+        <div class="container">
+            <h1 class="text-center">Wishlist Products</h1>
+
+            {% if search %}
+                <h5> Results for "{{ search }}" ( {{ products.count }} )</h5>
+            {% endif %}
+
+
+            <div id="products" class="align-items-center mt-5 row">
+                {% for product in products %}
+                    <div class="card mb-3 col-md-5 col-sm-12 mx-1" id="productDiv-{{ product.id }}">
+                        <div class="row no-gutters">
+                            <div class="col-md-4">
+                                {% if product.productimage_set.all %}
+                                    <img src="{{ product.main_product_image }}" class="card-img" alt="..."
+                                         style="height: 200px; width: 180px;">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    <p class="card-text">{{ product.description|safe }}</p>
+                                    {% if request.user == product.user %}
+                                    <a href="{% url 'sale:update' product.slug %}" class="text-warning">Edit</a>
+                                    <a onclick="deleteProduct('{{ product.id }}')" class="text-danger"
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                       style="cursor:pointer;">Delete</a>
+                                    {% endif %}
+                                    <br><br>
+
+                                    {% if request.user.is_authenticated %}
+                                    <p onclick="addWishlist('{{ product.id }}')" id="wishDiv-{{ product.id }}" style="cursor:pointer ;">
+                                        {% if request.user in product.wishlist.all %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" fill="#c0392b" height="24" viewBox="0 0 24 24"><path d="M12 4.248c-3.148-5.402-12-3.825-12 2.944 0 4.661 5.571 9.427 12 15.808 6.43-6.381 12-11.147 12-15.808 0-6.792-8.875-8.306-12-2.944z"/></svg>
+                                        {% else %}
+                                            <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>
+                                        {% endif %}
+                                    </p>
+
+                                {%endif%}
+                                    <br><br>
+                                    <h5 class="card-text">{{ product.total_price|floatformat:2 }} AZN</h5>
+                                    <p class="card-text"><small
+                                            class="text-muted">Created {{ product.created_at|timesince }} ago</small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </section>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete Product</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+                    <button type="button" class="btn btn-danger" data-id="" id="deleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        var delete_url = "{% url 'sale:delete' %}"
+        var wish_url = "{% url 'sale:wish' %}"
+        var fill_heart_svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4.248c-3.148-5.402-12-3.825-12 2.944 0 4.661 5.571 9.427 12 15.808 6.43-6.381 12-11.147 12-15.808 0-6.792-8.875-8.306-12-2.944z"/></svg>`
+        var heart_svg = `<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>`
+    </script>
+
+    <script>
+        function deleteProduct(id){
+            $("#deleteBtn").attr("data-id", id)
+        }
+
+        $("#deleteBtn").click(function (){
+            var id = $(this).attr("data-id")
+
+            var myHeaders = new Headers();
+            myHeaders.append(
+                "X-CSRFToken",
+                document.querySelector("[name=csrfmiddlewaretoken]").value
+            );
+
+            var formData = new FormData();
+
+            formData.append("id", id);
+
+            var requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: formData,
+                redirect: "follow",
+            };
+
+            response = fetch(delete_url, requestOptions).then(function (response) {
+                    if (response.ok) {
+                        response.json().then((data) => {
+                            // productun divini silmek
+                            $("#productDiv-"+id).remove()
+                            $("button[data-bs-dismiss='modal']").click()
+                        });
+                    }
+                });
+        })
+    </script>
+
+
+<script>
+    function addWishlist(id){
+
+        var myHeaders = new Headers();
+        myHeaders.append(
+            "X-CSRFToken",
+            document.querySelector("[name=csrfmiddlewaretoken]").value
+        );
+
+        var formData = new FormData();
+
+        formData.append("id", id);
+
+        var requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: formData,
+            redirect: "follow",
+        };
+
+        response = fetch(wish_url, requestOptions).then(function (response) {
+                if (response.ok) {
+                    response.json().then((data) => {
+                        console.log(data)
+                        if(data.success){
+                            $("#wishDiv-"+id).html(fill_heart_svg)
+                        }else{
+                            $("#wishDiv-"+id).html(heart_svg)
+                        }
+                    });
+                }
+            });
+    }
+</script>
+{% endblock %}

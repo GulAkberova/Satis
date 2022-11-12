@@ -79,6 +79,8 @@ class Product(BaseMixin):
     description = models.TextField(blank=True, null=True)
     subcategory = models.ForeignKey(Subcategory, on_delete=models.SET_NULL, blank=True, null=True)
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, blank=True, null=True)
+    
+    wishlist=models.ManyToManyField(User,related_name='wishlist',blank=True)
 
     # price fields
     price = models.FloatField()
@@ -134,4 +136,21 @@ class ProductImage(BaseMixin):
             self.slug = create_slug_shortcode(size=12, model_=ProductImage)
 
         super(ProductImage, self).save(*args, **kwargs)
+
+   
+
+
+class Basket(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return self.product.name
+
+    class Meta:
+        ordering = ("-id",)
+        verbose_name = "Basket"
+        verbose_name_plural = "Basket"
+
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import(
-    Category,Subcategory,Brand,Product,ProductImage
+    Category,Subcategory,Brand,Product,ProductImage,Basket
 )
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -9,7 +9,7 @@ class CategoryAdmin(admin.ModelAdmin):
         model=Category
     
     list_display=("name","slug","created_at","updated_at")
-
+    search_fields=("name",)
 admin.site.register(Category,CategoryAdmin)
 
 
@@ -20,7 +20,8 @@ class SubcategoryAdmin(admin.ModelAdmin):
         model=Subcategory
     
     list_display=("name",'category',"slug","created_at","updated_at")
-
+    list_filter=("category",)
+    
 admin.site.register(Subcategory,SubcategoryAdmin)
 
 
@@ -47,3 +48,4 @@ class ProductAdmin(admin.ModelAdmin):
 
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductImage)
+admin.site.register(Basket)

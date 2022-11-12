@@ -1,0 +1,397 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    <title>Product Page</title>
+{% endblock %}
+{% block body %}
+
+    <div class="text-center my-5">
+       {%csrf_token%}
+        <h1>All Products</h1>
+    </div>
+    <div class="w-100 d-flex justify-content-between">
+        <div class="container">
+            <div class="col-lg-12 d-flex justify-content-between">
+                <div class="col-lg-3">
+                    <form action="" method="get">
+                        <h2 class="text-center">
+                            Filters
+                            <hr/>
+                        </h2>
+                        <div class="col-lg-12 row d-flex justify-content-between p-3 border border-succes">
+                                <div class="col-12">
+                                    <label>Min price
+                                        <input type="number" id="min_price"
+                                               name="min_price" class="form-control"
+                                                {% if min_price %}value="{{ min_price }}"{% endif %}/>
+                                    </label>
+                                </div>
+                                <div class="col-12 my-3">
+                                    <label>Max price
+                                        <input type="number" id="max_price" name="max_price"
+                                                class="form-control"
+                                                {% if max_price %}value="{{ max_price }}"{% endif %}/>
+                                    </label>
+                                </div>
+                                <button class="btn btn-outline-success col-6 mx-3"
+                                        type="submit">
+                                    Search
+                                </button>
+                        </div>
+                        <div class="col-lg-12 border p-3 mt-3">
+                                <span>Filterle</span>
+                                <button
+                                        class="btn btn-outline-success"
+                                        type="submit"
+                                >
+                                    Search
+                                </button>
+                            <br><br>
+
+                            {% for category in categories %}
+                                <span><b>{{ category.name }}</b></span>
+
+                                {% for subcategory in category.subcategory_set.all %}
+                                    <div class="filter">
+                                        <span class="py-1">{{ subcategory.name }}</span>
+                                        <input type="checkbox" name="subcategory" value="{{ subcategory.id }}"
+                                                {% if subcategory.id in selected_subcategories %} checked {% endif %}/><br/>
+                                    </div>
+
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </form>
+                </div>
+                <div class="col-lg-9 d-flex flex-wrap ps-5">
+                    {% for product in products %}
+                        <div class="col-lg-6 px-1" id="productDiv-{{product.id}}">
+                            <div class="card mb-1" style="max-width: 540px;">
+                                <div class="row g-0">
+                                    <div class="col-md-4">
+                                        {% if product.productimage_set.all %}
+                                            <!-- <h1>{{product.productimage_set.all}}</h1> -->
+                                            <!-- <h1>{{product.main_product_image}}</h1> -->
+                                            <img
+                                                    src="{{ product.main_product_image }}"
+                                                    class="card-img mt-4"
+                                                    alt="..."
+
+                                            />
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ product.name }}</h5>
+                                            <p class="card-text">{{ product.description|safe }}</p>
+                                            {%if request.user == product.user %}
+                                              <a href="{%url 'sale:update' product.slug %}" class="text-warning">Edit</a>
+                                              <a  onclick="deleteProduct('{{product.id}}')" class="text-danger" 
+                                              data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                              style="cursor:pointer ;">Delete</a>
+                                            {%endif%}
+
+                                      
+
+                                            {% if request.user.is_authenticated %}
+                                                <span onclick="addWishlist('{{ product.id }}')" id="wishDiv-{{ product.id }}" style="cursor:pointer ;">
+                                                    {% if request.user in product.wishlist.all %}
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" fill="#c0392b" height="24" viewBox="0 0 24 24"><path d="M12 4.248c-3.148-5.402-12-3.825-12 2.944 0 4.661 5.571 9.427 12 15.808 6.43-6.381 12-11.147 12-15.808 0-6.792-8.875-8.306-12-2.944z"/></svg>
+                                                    {% else %}
+                                                        <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>
+                                                    {% endif %}
+                                                </span>
+                                                <span onclick="addBasket('{{ product.id }}')" id="basketDiv-{{ product.id }}" style="font-size: 20px;cursor: pointer;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-basket-fill" viewBox="0 0 16 16">
+                                                      <path d="M5.071 1.243a.5.5 0 0 1 .858.514L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15.5a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5H15v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9H.5a.5.5 0 0 1-.5-.5v-2A.5.5 0 0 1 .5 6h1.717L5.07 1.243zM3.5 10.5a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0v-3zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0v-3zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0v-3zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0v-3zm2.5 0a.5.5 0 1 0-1 0v3a.5.5 0 0 0 1 0v-3z"/>
+                                                    </svg>
+                                                </span>
+
+                                            {%endif%}
+                                              
+                                                <!-- <p class="card-text">{{ product.tax_float_price }}</p> -->
+                                                <h6>{{ product.total_price|floatformat:2 }}</h6>
+                                                <p class="card-text">
+                                                    <small class="text-muted"
+                                                    >Created {{ product.created_at|timesince }}</small
+                                                    >
+                                                </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+            <div>
+                {% if paginator.num_pages > 1 %}
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                            {% if products.has_previous %}
+                                <li class="page-item"><a class="page-link bg-dark text-light"
+                                                         href="?page={{ products.previous_page_number }}">
+                                    <
+                                </a></li>
+                            {% endif %}
+                            {% for i in products.paginator.page_range %}
+                                {% if products.number == i %}
+                                    <li class="page-item active"><a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                    </li>
+                                {% elif products.number != i %}
+                                    <li class="page-item"><a class="page-link" href="?page=
+                              {{ i }}{% if search %}&search={{ search }}{% endif %}">{{ i }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            {% if products.has_next %}
+                                <li class="page-item"><a class="page-link bg-dark text-light"
+                                                         href="?page={{ products.next_page_number }}">
+                                    >
+                                </a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete Product</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+                    <button type="button" class="btn btn-danger" data-id="" id="deleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{%  block js %}
+   <script>
+    var delete_url = "{% url 'sale:delete' %}"
+    var wish_url="{%url 'sale:wish'%}"
+    var basket_url = "{% url 'sale:add-basket' %}"
+    var fill_heart_svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="#c0392b" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4.248c-3.148-5.402-12-3.825-12 2.944 0 4.661 5.571 9.427 12 15.808 6.43-6.381 12-11.147 12-15.808 0-6.792-8.875-8.306-12-2.944z"/></svg>`
+    var heart_svg = `<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402m5.726-20.583c-2.203 0-4.446 1.042-5.726 3.238-1.285-2.206-3.522-3.248-5.719-3.248-3.183 0-6.281 2.187-6.281 6.191 0 4.661 5.571 9.429 12 15.809 6.43-6.38 12-11.148 12-15.809 0-4.011-3.095-6.181-6.274-6.181"/></svg>`
+    </script>
+
+    <script>
+        function deleteProduct(id){
+            $("#deleteBtn").attr("data-id", id)
+        }
+
+        $("#deleteBtn").click(function (){
+            var id = $(this).attr("data-id")
+
+            var myHeaders = new Headers();
+            myHeaders.append(
+                "X-CSRFToken",
+                document.querySelector("[name=csrfmiddlewaretoken]").value
+            );
+
+            var formData = new FormData();
+
+            formData.append("id", id);
+
+            var requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: formData,
+                redirect: "follow",
+            };
+
+            response = fetch(delete_url, requestOptions).then(function (response) {
+                    if (response.ok) {
+                        response.json().then((data) => {
+                            // productun divini silmek
+                            $("#productDiv-"+id).remove()
+                            $("button[data-bs-dismiss='modal']").click()
+                        });
+                    }
+                });
+        })
+    </script>
+
+
+    <script>
+        function addWishlist(id){
+
+            var myHeaders = new Headers();
+            myHeaders.append(
+                "X-CSRFToken",
+                document.querySelector("[name=csrfmiddlewaretoken]").value
+            );
+
+            var formData = new FormData();
+
+            formData.append("id", id);
+
+            var requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: formData,
+                redirect: "follow",
+            };
+
+            response = fetch(wish_url, requestOptions).then(function (response) {
+                    if (response.ok) {
+                        response.json().then((data) => {
+                            console.log(data)
+                            if(data.success){
+                                $("#wishDiv-"+id).html(fill_heart_svg)
+                            }else{
+                                $("#wishDiv-"+id).html(heart_svg)
+                            }
+                        });
+                    }
+                });
+        }
+    </script>
+
+
+    <script>
+        function addBasket(id){
+            var myHeaders = new Headers();
+            myHeaders.append(
+                "X-CSRFToken",
+                document.querySelector("[name=csrfmiddlewaretoken]").value
+            );
+
+            var formData = new FormData();
+
+            formData.append("id", id);
+
+            var requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: formData,
+                redirect: "follow",
+            };
+
+            response = fetch(basket_url, requestOptions).then(function (response) {
+                    if (response.ok) {
+                        response.json().then((data) => {
+                            $("#basket_counter").text(data.basket_count)
+                        });
+                    }
+                });
+        }
+    </script>
+
+
+   
+ 
+  <script>
+    function deleteProduct(id){
+        $("#deleteBtn").attr("data-id", id)
+    }
+
+    $("#deleteBtn").click(function (){
+        var id = $(this).attr("data-id")
+
+        var myHeaders = new Headers();
+        myHeaders.append(
+            "X-CSRFToken",
+            document.querySelector("[name=csrfmiddlewaretoken]").value
+        );
+
+        var formData = new FormData();
+
+        formData.append("id", id);
+
+        var requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: formData,
+            redirect: "follow",
+        };
+
+        response = fetch(delete_url, requestOptions).then(function (response) {
+                if (response.ok) {
+                    response.json().then((data) => {
+                        // productun divini silmek
+                        $("#productDiv-"+id).remove()
+                        // $("button[data-bs-dismiss='modal']").click() 
+                    });
+                }
+            });
+    })
+   </script>
+
+
+<script>
+    function addWishlist(id){
+
+        var myHeaders = new Headers();
+        myHeaders.append(
+            "X-CSRFToken",
+            document.querySelector("[name=csrfmiddlewaretoken]").value
+        );
+
+        var formData = new FormData();
+
+        formData.append("id", id);
+
+        var requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: formData,
+            redirect: "follow",
+        };
+
+        response = fetch(wish_url, requestOptions).then(function (response) {
+                if (response.ok) {
+                    response.json().then((data) => {
+                        console.log(data)
+                        if(data.success){
+                            $("#wishDiv-"+id).html(fill_heart_svg)
+                        }else{
+                            $("#wishDiv-"+id).html(heart_svg)
+                        }
+                    });
+                }
+            });
+    }
+</script>
+
+
+
+
+<script>
+    function addBasket(id){
+        var myHeaders = new Headers();
+        myHeaders.append(
+            "X-CSRFToken",
+            document.querySelector("[name=csrfmiddlewaretoken]").value
+        );
+
+        var formData = new FormData();
+
+        formData.append("id", id);
+
+        var requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: formData,
+            redirect: "follow",
+        };
+
+        response = fetch(basket_url, requestOptions).then(function (response) {
+                if (response.ok) {
+                    response.json().then((data) => {
+                        $("#basket_counter").text(data.basket_count)
+                    });
+                }
+            });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{%extends 'base.html'%} 
+{%load static%}
+{%block title%}
+<title>Login page</title>
+{%endblock%}
+{%block body%}
+
+{% if request.user.is_authenticated %}
+<h6>{{request.user.first_name}} Xos geldin</h6>
+{% else %}
+<h6>{{request.user.first_name}} Login ol</h6>
+{% endif %}
+
+    <form method="POST">
+        <h1>Login {{request.user.first_name}}</h1>
+        {% csrf_token %}
+        {{form.as_p}}
+        <button type="submit">Login</button>
+
+    </form>
+    
+
+{%endblock%}

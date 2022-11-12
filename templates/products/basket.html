@@ -1,0 +1,44 @@
+{% extends 'base.html' %} {% load static %} {% block title %}
+<title>Product Page</title>
+{% endblock %} {% block body %}
+
+<div class="col-lg-12">
+    <div class="container">
+  <table class="border w-70%"
+    width="100%"
+    border="1"
+    cellspacing="0"
+    cellpadding="5"
+  >
+    <thead class="border">
+      <tr align="center" class="border">
+        <th>Mehsul adi</th>
+        <th>Sayi</th>
+        <th>Qiymet</th>
+        <th>Sekil</th>
+        <th>Remove</th>
+      </tr>
+    </thead>
+    <tbody class="border" align="center">
+      {% for basket in baskets %}
+
+      <tr>
+        <td>{{ basket.product.name }}</td>
+        <td> <button class="px-2 border" id="artir">+</button> {{ basket.quantity }} <button class="px-2 border">-</button></td>
+        <td>{{basket.product.price}}</td>
+
+        <td>
+          <img
+            width="50px"
+            src="{{basket.product.main_product_image}}"
+          />
+        </td>
+        <td><svg style="width:25px;" clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m12 10.93 5.719-5.72c.146-.146.339-.219.531-.219.404 0 .75.324.75.749 0 .193-.073.385-.219.532l-5.72 5.719 5.719 5.719c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.385-.073-.531-.219l-5.719-5.719-5.719 5.719c-.146.146-.339.219-.531.219-.401 0-.75-.323-.75-.75 0-.192.073-.384.22-.531l5.719-5.719-5.72-5.719c-.146-.147-.219-.339-.219-.532 0-.425.346-.749.75-.749.192 0 .385.073.531.219z"/></svg></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</div>
+
+{% endblock %}

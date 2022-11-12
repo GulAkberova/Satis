@@ -1,0 +1,207 @@
+{%extends 'base.html'%} 
+{%load static%}
+{%block title%}
+<title>Create Page</title>
+{%endblock%}
+{%block body%}
+<section class="mt-5">
+    <div class="container">
+       <h3 class="text-center">Create Page</h3>
+       <form method="POST" class="px-5" enctype="multipart/form-data">
+           {%csrf_token%}
+
+           <div class="form-group mt-4">
+            <label>{{product_form.name.label_tag}}</label><br/>
+            {{product_form.name}}
+           </div>
+           <div class="form-group mt-4">
+            <label>{{product_form.description.label_tag}}</label><br/>
+            {{product_form.description}}
+           </div>
+           <div class="form-group mt-4">
+            <label>{{product_form.brand.label_tag }}</label><br>
+          
+            <div class="input-group mb-3">
+                {{ product_form.brand }}
+                <div class="input-group-append">
+                    <span class="input-group-text btn btn-warning"
+                          data-bs-toggle="modal" data-bs-target="#createBrand">+</span>
+                </div>
+            </div>
+        </div> 
+           <div class="form-group mt-4">
+            <label>{{product_form.category.label_tag}}</label><br/>
+            {{product_form.category}}
+           </div>
+           <div class="form-group mb-2">
+            <label class="mb-2">Subcategory</label><br>
+            <select name="subcategory" id="id_subcategory" class="form-control">
+                <option value="">---------</option>
+            </select>
+             </div>
+           <div class="form-group mt-4">
+            <label>{{product_form.price.label_tag}}</label><br/>
+            {{product_form.price}}
+           </div>
+           <div class="form-group mt-4">
+            <label>{{product_form.tax_price.label_tag}}</label><br/>
+            {{product_form.tax_price}}
+           </div>
+           <div class="form-group mt-4">
+            <label>{{product_form.discount_price.label_tag}}</label><br/>
+            {{product_form.discount_price}}
+           </div>
+           <h4>Images</h4>
+           <div class="form-group mb-4">
+               <div id="imagesDiv" class="mb-4">
+                   <input type="file" name="image" accept="image/png, image/gif, image/jpeg"/>
+               </div>
+
+               <a class="btn btn-primary" id="addImageButton" onclick="addImage()"> + </a>
+           </div>
+
+
+
+        
+            <button type="submit" class="btn btn-success my-4">Create Product</button>
+       </form>
+
+    </div>
+
+ <div class="modal fade" id="createBrand" tabindex="-1" role="dialog"
+    aria-hidden="true">
+   <div class="modal-dialog" role="document">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h5 class="modal-title" id="exampleModalLabel">Create New Brand</h5>
+               <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <div class="modal-body">
+               <form>
+                   <div class="form-group">
+                       <label class="mb-2">Brand Name</label>
+                       <input type="text" class="form-control" name="brand_name" id="brand_name">
+                       <p class="text-danger" style="display: none" id="brand-error">This field is required</p>
+                   </div>
+               </form>
+           </div>
+           <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+               <button type="button" class="btn btn-primary" id="createBrandBtn">Create Brand</button>
+           </div>
+       </div>
+   </div>
+ </div>
+</section>
+{%endblock%}
+
+{%block js%}
+<script>
+        var load_subcategories_url = "{% url 'sale:load-subcategories' %}"
+        var create_brand_url = "{% url 'sale:create-brand' %}"
+</script>
+<script>
+        $("#id_category").change(function (event) {
+
+var myHeaders = new Headers();
+myHeaders.append(
+    "X-CSRFToken",
+    document.querySelector("[name=csrfmiddlewaretoken]").value
+);
+
+var formData = new FormData();
+
+formData.append("category", event.target.value);
+
+var requestOptions = {
+    method: "POST",
+    headers: myHeaders,
+    body: formData,
+    redirect: "follow",
+};
+
+response = fetch(load_subcategories_url, requestOptions).then(function (response) {
+    if (response.ok) {
+        response.json().then((data) => {
+            var subcategories = data.subcategories
+
+            $("#id_subcategory").html(`
+            <option id="">---------</option>
+            `)
+
+            for (var i = 0; i < subcategories.length; i++) {
+                            $("#id_subcategory").append(`
+                                <option value="${subcategories[i]["id"]}">${subcategories[i]["name"]}</option>
+                          `)
+                        }
+        });
+    }
+});
+})
+
+
+
+function addImage() {
+            var image_inputs = $("input[type='file']").length
+
+
+            if (image_inputs < 3) {
+                $("#imagesDiv").append(`
+                    <input type="file" name="image" accept="image/png, image/gif, image/jpeg" />
+                `)
+            }
+
+            if (image_inputs >= 2) {
+                $("#addImageButton").css("display", "none")
+            }
+        }
+
+
+</script>
+
+
+
+<script>
+    $("#createBrandBtn").click(function (){
+        var brand = $("#brand_name").val()
+
+        if(brand){
+            $("#brand-error").css("display", "none")
+            $("#brand_name").css("border", "1px solid #ced4da")
+
+            var myHeaders = new Headers();
+            myHeaders.append(
+                "X-CSRFToken",
+                document.querySelector("[name=csrfmiddlewaretoken]").value
+            );
+
+            var formData = new FormData();
+
+            formData.append("brand_name", brand);
+
+            var requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: formData,
+                redirect: "follow",
+            };
+
+            response = fetch(create_brand_url, requestOptions).then(function (response) {
+                if (response.ok) {
+                    response.json().then((data) => {
+                        $("#id_brand").append(`
+                            <option value="${data.id}" selected>${data.name}</option>
+                        `)
+                        $("button[data-bs-dismiss='modal']").click()
+                    });
+                }
+            });
+        }else{
+            $("#brand-error").css("display", "block")
+            $("#brand_name").css("border", "2px solid red")
+        }
+    })
+</script>
+{%endblock%}
