@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+    <title>Product Page</title>
+{% endblock %}
+{% block body %}
+
+    <div class="text-center my-5">
+        <h1>All Products</h1>
+    </div>
+    <div class="w-100 d-flex justify-content-between">
+        <div class="container">
+            <div class="col-lg-12 d-flex justify-content-between">
+                <div class="col-lg-3">
+                    <form action="" method="get">
+                        <h2 class="text-center">
+                            Filters
+                            <hr/>
+                        </h2>
+                        <div class="col-lg-12 row d-flex justify-content-between p-3 border border-succes">
+                                <div class="col-12">
+                                    <label>Min price
+                                        <input type="number" id="min_price"
+                                               name="min_price" class="form-control"
+                                                {% if min_price %}value="{{ min_price }}"{% endif %}/>
+                                    </label>
+                                </div>
+                                <div class="col-12 my-3">
+                                    <label>Max price
+                                        <input type="number" id="max_price" name="max_price"
+                                                class="form-control"
+                                                {% if max_price %}value="{{ max_price }}"{% endif %}/>
+                                    </label>
+                                </div>
+                                <button class="btn btn-outline-success col-6 mx-3"
+                                        type="submit">
+                                    Search
+                                </button>
+                        </div>
+                        <div class="col-lg-12 border p-3 mt-3">
+                                <span>Filterle</span>
+                                <button
+                                        class="btn btn-outline-success"
+                                        type="submit"
+                                >
+                                    Search
+                                </button>
+                            <br><br>
+
+                            {% for category in categories %}
+                                <span><b>{{ category.name }}</b></span>
+
+                                {% for subcategory in category.subcategory_set.all %}
+                                    <div class="filter">
+                                        <span class="py-1">{{ subcategory.name }}</span>
+                                        <input type="checkbox" name="subcategory" value="{{ subcategory.id }}"
+                                                {% if subcategory.id in selected_subcategories %} checked {% endif %}/><br/>
+                                    </div>
+
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </form>
+                </div>
+                <div class="col-lg-9 d-flex flex-wrap ps-5">
+                    {% for product in products %}
+                        <div class="col-lg-6 px-1">
+                            <div class="card mb-1" style="max-width: 540px;">
+                                <div class="row g-0">
+                                    <div class="col-md-4">
+                                        {% if product.productimage_set.all %}
+                                            <!-- <h1>{{product.productimage_set.all}}</h1> -->
+                                            <!-- <h1>{{product.main_product_image}}</h1> -->
+                                            <img
+                                                    src="{{ product.main_product_image }}"
+                                                    class="card-img mt-4"
+                                                    alt="..."
+
+                                            />
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ product.name }}</h5>
+                                            <p class="card-text">{{ product.description|safe }}</p>
+                                            <p class="card-text">{{ product.tax_float_price }}</p>
+                                            <h6>{{ product.total_price|floatformat:2 }}</h6>
+                                            <p class="card-text">
+                                                <small class="text-muted"
+                                                >Created {{ product.created_at|timesince }}</small
+                                                >
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+            <div>
+                {% if paginator.num_pages > 1 %}
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                            {% if products.has_previous %}
+                                <li class="page-item"><a class="page-link bg-dark text-light"
+                                                         href="?page={{ products.previous_page_number }}">
+                                    <
+                                </a></li>
+                            {% endif %}
+                            {% for i in products.paginator.page_range %}
+                                {% if products.number == i %}
+                                    <li class="page-item active"><a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                    </li>
+                                {% elif products.number != i %}
+                                    <li class="page-item"><a class="page-link" href="?page=
+                              {{ i }}{% if search %}&search={{ search }}{% endif %}">{{ i }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            {% if products.has_next %}
+                                <li class="page-item"><a class="page-link bg-dark text-light"
+                                                         href="?page={{ products.next_page_number }}">
+                                    >
+                                </a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
